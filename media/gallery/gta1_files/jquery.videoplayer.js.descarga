@@ -1,0 +1,79 @@
+(function(window, $, document){
+
+    $.fn.videoplayer = function(method)
+    {
+        var _html5 = function() {
+            var _load = function($container) {
+                var settings = $container.data('settings'),
+                    params = $.param({
+                        id: parseInt(settings.videoid),
+                        context: settings.context,
+                        locale: settings.locale,
+                        resolution: settings.resolution,
+                        info: settings.info,
+                        share: settings.share,
+                        agegate: settings.agegate,
+                        autoplay: settings.autoplay
+                    }),
+                    iframe = $('<iframe>')
+                        .css({
+                            display: 'block',
+                            margin: '0 auto',
+                            border: 'none',
+                            width: settings.width,
+                            height: settings.height
+                        })
+                        .attr({src: '//' + settings.serviceroot + '.rockstargames.com/videoplayer/?' + params, allowfullscreen: 'true'});
+
+                $container.html(iframe);
+            }
+            return {
+                init : function($container)
+                {
+                    _load($container);
+                }
+            }
+        }(),
+        methods = {
+            init : function(options)
+            {
+                return this.each(function() {
+                    var $container = $(this),
+                        settings = {
+                            'agegate': true,
+                            'autoplay': false,
+                            'serviceroot': null,
+                            'context': 'site',
+                            'locale': 'en_us',
+                            'resolution': 'auto',
+                            'info': true,
+                            'share': true,
+                            'width': '640px',
+                            'height': '360px'
+                        };
+                    if (typeof options !== 'undefined') {
+                        $.extend(settings, options);
+                    }
+                    if (typeof settings.videoid === 'undefined') {
+                        return $.error("You need to give this method a video id.");
+                    }
+
+                    if (settings.serviceroot === null) {
+                        settings.serviceroot =  window.location.hostname.split('.')[0];
+                    }
+                    $container.data('settings', settings);
+                    _html5.init($container);
+                });
+            }
+        };
+
+        if (methods[method]) {
+            return methods[ method ].apply( this, Array.prototype.slice.call( arguments, 1 ));
+        } else if ( typeof method === 'object' || ! method ) {
+            return methods.init.apply( this, arguments );
+        } else {
+            $.error( 'Method ' +  method + ' does not exist on $.videoplayer' );
+        }
+    };
+
+})(window, window.jQuery, document);

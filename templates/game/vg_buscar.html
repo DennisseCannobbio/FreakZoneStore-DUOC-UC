@@ -1,0 +1,49 @@
+{% extends "main_template.html" %}
+{% load humanize %}
+{% block content %}
+<div class="container">
+  <div class="row">
+    {% include 'game/lateral_bar.html' %}
+    <div class="col-lg-10">
+      <div class="card-body">
+          <h3 class="card-title">Mantenedor de videojuegosVideojuegos</h3>
+          <h4>{{ titulo|title  }} un Videojuego</h4>
+          <form method="GET" action="">
+              <input type="text" name="q" placeholder="Introduzca la Id del videojuego" >
+              <input type="submit" name="Serch" value = "{{ title }}">
+
+          </form>
+
+      </div>
+      <table class="table">
+        <thead>
+        <tr>
+          <th>Id</th>
+          <th>Nombre</th>
+          <th>Consola</th>
+          <th>Opciones</th>
+        </tr>
+        </thead>
+        
+        <tbody>
+          
+          {% for object in object_list %}
+          <tr>
+            <th scope="row">{{ object.vg_id }}</th>
+            <td>{{ object.vg_nom }}</td>
+            <td>{{ object.vg_plat }}</td>
+            <td>
+              <a href="{{ object.get_absolute_url }}" class="btn btn-secondary" >Mostrar</a>
+              <a href="{% url 'game:editar' pk=object.vg_id %}" class="btn btn-secondary" >Editar</a>
+              <a href="{% url 'game:eliminar' pk=object.vg_id %}" class="btn btn-secondary" >Eliminar</a>
+            </td>
+          </tr>
+
+          {% endfor %}
+          
+        </tbody>
+      </table>
+    </div> 
+  </div>
+</div>
+{% endblock %}

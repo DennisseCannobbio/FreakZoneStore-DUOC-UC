@@ -1,0 +1,28 @@
+{% extends "main_template.html" %}
+{% load humanize %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        {% include 'game/lateral_bar.html' %}
+        <div class="col-lg-9">
+            
+            <div class="card-body">
+                <h3 class="card-title">Mantenedor de videojuegosVideojuegos</h3>
+                <h4>{{ titulo|title  }} un Videojuego</h4>
+                <h4>Ingresar los datos</h4>
+                <p id="error"> Porfavor Corrija las casillas marcadas en rojo</p>
+                <p id="succes"> La Información se Envió correctamente, por favor verifique si E-mail.</p>
+                <div class="tab-pane fade show active" id="usr" role="tabpanel" aria-labelledby="home-tab">
+                    <form enctype="multipart/form-data" method="POST">{% csrf_token %} 
+                        
+                        {{ form.as_p }}
+                        
+                        <input type="submit" value="{{ title }}"> 
+                    </form>
+                
+                </div>
+            </div>
+        </div>
+    </div> 
+</div>
+{% endblock %}|

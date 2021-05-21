@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        {% load static %} <link rel="stylesheet" href="{% static '/vendor/bootstrap/css/bootstrap.css' %}">
+        <link rel="stylesheet" href="{% static '/allStyle.css' %}">
+        <link rel="stylesheet" href="{% static '/css_profile.css' %}">
+        <!-- Bootstrap core JavaScript -->
+        <script src="{% static '/vendor/jquery/jquery.min.js' %}"></script>
+        <script src="{% static '/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+        <script src="{% static '/vendor/bootstrap/js/bootstrap.js' %}"></script>
+        <link rel="shortcut icon" href="{% static '/favicon.ico' %}" type="image/x-icon">
+        <link rel="icon" href="{% static '/favicon.ico' %}" type="image/x-icon">
+        <!-- scripts -->
+        <script src="{% static 'vendor/jquery/script.js' %}"></script>
+    </head>
+    <body>
+        <!--Aqui se encuentra la parte del header-->
+        <div class="header" onload="loadCart()">
+                <a href="{% url 'inicio' %}"><img src="{% static '/img/header/head2.png' %}" alt="logo de Freak Zone Store" style="text-align: center; width:50%;"></a>
+                <div id="nav">
+                    <ul class="parent">
+                        <li style="width:15%" class="navli"><a href="{% url 'inicio' %}">Inicio</a></li>
+
+                        <li style="width:10%" class="navli"><a href="{% url 'console:allconsole' %}">Consolas</a>
+                            <ul class="child">
+                                <li><a href="#">Nintendo Switch</a></li>
+                                <li><a href="#">PlayStation 4</a></li>
+                                <li><a href="#">Xbox One</a></li>
+                                <li><a href="{% url 'retro' %}">Retro</a></li>
+                            </ul>
+                        </li>
+
+                        <li style="width:10%" class="navli"><a href="{% url 'game:allgame' %}">Videojuegos</a>
+                            <ul class="child">
+                                <li><a href="{% url 'game:nswgame' %}">Nintendo Switch</a></li>
+                                <li><a href="{% url 'game:ps4game' %}">PlayStation 4</a></li>
+                                <li><a href="{% url 'game:xbogame' %}">Xbox One</a></li>
+                            </ul>
+                        </li>
+                        <li style="width:8%" class="navli"><a href="{% url 'figuras' %}">Figuras</a>
+                            <ul class="child">
+                                <li><a href="#">Funko</a></li>
+                                <li><a href="#">Otros</a></li>
+                            </ul>
+                        </li>
+                        <li style="width:5%" class="navli"><a href="{% url 'tcg' %}">TCG</a>
+                            <ul class="child">
+                                <li><a href="#">Magic</a></li>
+                                <li><a href="#">Pokemon</a></li>
+                                <li><a href="#">Yu-Gi-Oh!</a></li>
+                            </ul>
+                        </li>
+                        <li style="width:10%" class="navli"><div id="cart">Carrito (0)</div></li>
+                        {% if user.is_authenticated %}
+                            <li style="width:12%" class="navli"><a href="#">{{ user.get_username }}</a>
+                                <ul class="child">
+                                    <li><a href= "{{ user.cuenta.get_absolute_url }}">Profile</a></li>
+                                    {% if user.is_superuser %}
+                                        <li><a href="{% url 'game:serchVG' %}">Mantenedor</a></li>
+                                    {% endif %}
+                                    <li><a href="{% url 'logout'%}?next={{request.path}}">Logout</a></li>
+                                </ul>
+                            </li>
+                        {% else %}
+                            <li style="width:5%" class="navli"><a href="{% url 'login'%}?next={{request.path}}">Login</a>
+                            <li style="width:8%" class="navli"><a href="{% url 'cliente:reg' %}">Registrarse</a></li>
+                        {% endif %}
+                        <li style="width:24%" class="navli"><a href="#">Buscar</a>
+                          <ul class="child">
+                            <li>
+                              <div class="input-group md-form form-sm form-1 pl-0 col-md-3">
+                                <div class="input-group-prepend">
+                                <span class="input-group-text purple lighten-3" id="basic-text1"><i class="fas fa-search text-white"
+                                    aria-hidden="true"></i><img src="{% static '/img/header/buscar.png' %}" alt="icono de busqueda" width="20" height="20"></span>
+
+                                <input class="form-control my-0 py-1" id="buscador" type="text" placeholder="  Buscar.." size="100" aria-label="Buscar..">
+                                </div>
+                              </div>
+                              </li>
+                            </ul>
+                          </li>
+                    </ul>
+                </div>
+            </div>
+            <!--HEADER END-->
+
+        {% block content %}
+           Body content
+        {% endblock %}
+        <footer class="py-5 bg-dark">
+            <div class="container text-center" >
+                <a href="#sobreNosotros">Sobre Nosotros</a>
+                <a href="#contacto">Contacto</a>
+                <a href="#politicasdeprivacidad">Política de Privacidad</a>
+                <a href="#derechosreservados">Políticas de Uso</a>
+            </div>
+            <!-- /.container -->
+        </footer>
+        <div class="footer">
+            <p class="m-0 text-center text-white">Copyright &copy; Freak Zone 2019</p>
+        </div>
+    </body>
+</html>

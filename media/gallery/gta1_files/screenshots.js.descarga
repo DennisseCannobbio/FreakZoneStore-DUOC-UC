@@ -1,0 +1,243 @@
+define(['jquery', 'underscore', 'backbone', 'dry/views/superController', 'text!' + V.base + V.i18n + 'screenshots?xhr', 'lib/util', 'videoplayer'], function($, _, Backbone, SuperController, markup, Util) {
+	var screenshots = SuperController.extend({
+		id : '#screenshots',
+		$root : {},
+		index : 0,
+		isUpdating : 0,
+		currTopOffset : 0,
+		thumbsLoaded : 0,
+		numScreenshots : 0,
+		windowScrollTop : 0,
+		events : {
+			'click ul.thumbs a' : 'clickThumb',
+			'click .screen .close' : 'clickClose',
+			'click .screen .next' : 'clickNext',
+			'click .screen .prev' : 'clickPrev',
+			'click ul.screen-select li' : 'imageChange',
+			'touchend ul.screen-select li' : 'imageChange'
+		},
+		initialize : function(options) {
+			var self = this;
+			this.render(markup);
+			this.$root = $('#screenshots', this.$el);
+			this.numScreenshots = $('ul.thumbs li', this.$root).length;
+
+			this.loadThumbs('pc-screens');
+
+			$('.screen .img img', this.$root).on('load', function() {
+				$(this).addClass('loaded');
+			})
+
+			window.Vlogo.attachTo(this.$root)
+
+			$(window).on("resize", _.bind(this.resize, this));
+			// $(window).scroll(this.imgScroll);
+			// $(document).on("scroll", _.bind(this.imgScroll, this));
+			// $(document).on("touchmove", _.bind(this.imgScroll, this));
+			// $(document).on("touchstart", _.bind(this.imgScroll, this));
+			// $(document).on("touchend", _.bind(this.imgScroll, this));
+			// $(document).on("touchenter", _.bind(this.imgScroll, this));
+			this.resize();
+			if ($('.viewport').html() || navigator.userAgent.match(/Nexus/i)) {
+				timeout = setInterval(function(){self.imgScroll()}, 100);
+			} else {
+				$(window).on("scroll", _.bind(this.imgScroll, this));
+			}
+
+			setTimeout(function(){ self.resize(); }, 2000);
+
+			if (typeof options.screenshot !== 'undefined')
+				this.setScreenById(options.screenshot);
+		},
+		imageChange : function(e) {
+			var $el = $(e.currentTarget),
+				type = $el.data('type');
+			$el.siblings('li').removeClass('active');
+			$el.addClass('active');
+			$('ul.row-fluid.thumbs.'+ type).siblings('.row-fluid').css({'display': 'none'});
+			$('ul.row-fluid.thumbs.'+ type).css({'display': 'block'});
+			this.loadThumbs(type);
+			this.imgScroll(type);
+
+		},
+		imgScroll : function() {
+			var self = this,
+				active = $(this.$root).find('.screen-select li.active').data('type');
+			this.$root.find('ul.thumbs.'+active+' li a').each(function(){
+				var thumbSrc = $(this).data('thumb'),
+					bound = this.getBoundingClientRect();
+				if ($(this).find('img').length === 1) return;
+				if(self.isElementInViewport(this)) {
+					$(this).append($('<img />').on('load', function(){
+						$(this).addClass('loaded')
+					}).attr('src', thumbSrc));
+				}
+			});
+		},
+
+		isElementInViewport : function(el) {
+			var rect = el.getBoundingClientRect();
+
+			return (
+				rect.top >= 0 &&
+				rect.left >= 0 &&
+				rect.bottom <= $(window).height() + 400 &&
+				rect.right <= $(window).width() + 400
+			);
+		},
+
+		update : function(options) {
+			if (typeof options.screenshot === 'undefined') {
+				this.shutDown();
+			} else {
+				this.setScreenById(options.screenshot)
+			}
+		},
+
+		loadThumbs : function(screens) {
+			var self = this,
+				$ul = this.$root.find('ul.thumbs.'+screens),
+				w = 640,
+				h = 360,
+				r = h/w;
+			this.$root.find('ul.thumbs.'+screens+' li a').each(function(){
+				$(this).attr('data-ratio', r);
+				$(this).height(r*$(this).width());
+				if ($(this).find('img').length === 1) return;
+			});
+			this.$root.removeData('loadNewScreens');
+			$(window).trigger('resize');
+		},
+
+		shutDown : function(){
+			var self = this,
+				$screen = $('.screen', this.$root);
+			if($('.viewport').html()) {
+				this.$root.removeClass('screenOn');
+				$('.view').scrollTop(self.currTopOffset);
+				$('.videoplayer-mobile').empty();
+				$('.view').css('overflowY','auto');
+			}
+			else if(navigator.userAgent.match(/Nexus/i)){
+				this.$root.removeClass('screenOn');
+				$(window).scrollTop(self.currTopOffset);
+				$('.videoplayer-mobile').empty();
+				$(window).css('overflowY','auto');
+			}
+			else{
+				this.$root.removeClass('screenOn');
+				$(window).trigger('resize');
+				$('html,body').scrollTop(self.windowScrollTop);
+			}
+			$('.screen .img img', this.$root).attr('src', '');
+			window.dryRouter.navigate('screenshots', {trigger: CincoModel.get('shouldTriggerURL')});
+		},
+
+		clickThumb : function(e) {
+			e.preventDefault();
+			var self = this,
+			$screen = $('.screen', this.$root);
+			if ($('.viewport').html()) {
+				self.currTopOffset = $('.view').scrollTop();
+				$('.view').scrollTop(0);
+				this.$root.addClass('screenOn');
+				$('.view').css('overflow','hidden');
+			}
+			if (navigator.userAgent.match(/Nexus/i)) {
+				self.currTopOffset = $(window).scrollTop();
+				$(window).scrollTop(0);
+				this.$root.addClass('screenOn');
+				$(window).css('overflow','hidden');
+			}
+			window.dryRouter.navigate(Util.urlSanitize($(e.currentTarget).attr('href')), {trigger: CincoModel.get('shouldTriggerURL')});
+		},
+
+		clickNext : function() {
+			$('.row-fluid a:eq('+ (this.index+1) +')').trigger('click');
+		},
+
+		clickPrev : function() {
+			$('.row-fluid a:eq('+ (this.index-1) +')').trigger('click');
+		},
+
+		clickClose : function() {
+			this.shutDown();
+		},
+
+		setScreenById : function(id) {
+			var $a = this.$root.find('li a').filter(function(){
+				return $(this).data('id') === parseInt(id);
+			});
+			if ($a.length === 1)
+				this.setScreenshot($a.parent().index('.span2'));
+		},
+
+		setScreenshot : function(i,ul) {
+			var self = this,
+				$screen = $('.screen', this.$root),
+				$screenContent = $('.content', $screen),
+				$a =  $('.row-fluid a:eq('+i+')'),
+				imgSrc = $a.data('full'),
+				prevCss = {},
+				nextCss = {},
+				shareURL = 'https://www.rockstargames.com/V/screenshots/screenshot/' + $a.data('id');
+
+			self.windowScrollTop = $(window).scrollTop();
+
+			this.index = i;
+
+			$screen.find('.img img').removeClass('loaded').attr('src', imgSrc);
+
+			if (i < 1)
+				prevCss = {'display':'none'};
+			else
+				prevCss = {'display':'block'};
+
+			if (i+1>=this.numScreenshots)
+				nextCss = {'display':'none'};
+			else
+				nextCss = {'display':'block'};
+
+			$screen.find('.prev').css(prevCss);
+			$screen.find('.next').css(nextCss);
+			$('.vlogo').hide();
+
+			this.$root.addClass('screenOn');
+
+			self.resize();
+
+			if(!$.browser.mobile){
+				$('html,body').scrollTop($screen.offset().top);
+			}
+
+		},
+
+		resize : function() {
+			var $screen = ('.screen', this.$root),
+				$screenContent = $('.content', $screen),
+				screenWidth = $screenContent.width(),
+				ratio = 1280/720,
+				footerHeight = $('.navbar').outerHeight(),
+				windowHeight = $(window).height(),
+				navHeight = $('.navbar').outerHeight(),
+				contentHeight = $('#dry').outerHeight(),
+				screenContentHeight = screenWidth/ratio + $screen.find('.top').outerHeight(),
+				screenContentMarginTop = Math.max(0, (windowHeight-screenContentHeight-footerHeight)*.5),
+				$img = $('.img', $screen),
+				$top = $('.top', $screen);
+
+			$screenContent.css({'height': screenContentHeight, 'margin-top':screenContentMarginTop});
+			$('ul.thumbs li a').each(function(){
+				var $el = $(this),
+					ratio = $el.data('ratio');
+				$el.height(ratio*$el.width());
+			});
+
+			this.imgScroll();
+			$screen.css('min-height', windowHeight-navHeight);
+			$img.css({'max-height' : windowHeight - $top.outerHeight()});
+
+		}
+	})
+	return screenshots;
+})

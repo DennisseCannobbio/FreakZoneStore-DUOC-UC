@@ -1,0 +1,26 @@
+{% extends "main_template.html" %}
+{% load humanize %}
+{% block content %}
+<div class="container" style="margin-top: 20px">
+    <div class="row">
+            {% for CS in object_list %}
+                <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card h-100">
+                          {% load static %}<a href="{{ CS.get_absolute_url }}"><img src="{{ CS.cs_main_img.url }}" alt="Consola" class ="imagenresp" style="width: 100%;"></a>
+                          <div class="card-body">
+                            <h4 class="card-title">
+                              <a href="{{ CS.get_absolute_url }}">{{ CS.cs_nom }}</a>
+                            </h4>
+                            <h6>{{ CS.cs_tipo }}</h6>
+                            <h5>${{ CS.cs_price|intcomma }}</h5>
+                            <p class="card-text"></p>
+                          </div>
+                          <div class="card-footer">
+                            <small class="text-muted">&#9733; &#9733; &#9733; &#9733; &#9734;</small>
+                          </div>
+                        </div>
+                      </div>
+            {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,208 @@
+{% extends "main_template.html" %}
+{% block content %}
+<!--Columna de destacados-->
+<title>Inicio | Freak Zone Store</title>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-3 d-none d-lg-table-cell" style="margin-left: 40px">
+            <h2 class="my-4" style="text-align: center"><b>Destacados</b></h2>
+            <div class="list-group">
+              <a href="{% url 'figuras' %}" class="list-group-item">
+                <p style="text-align: center;">{% load static %}<img alt="imagen figuras" src="{% static 'img/main/figcol.jpg' %}" style="width:100%"><br>
+                 ¡Nuevo stock en figuras! 
+                </p>
+              </a>
+              <a href="{% url 'console:allconsole' %}" class="list-group-item">
+                  <p style="text-align: center;"><img src="{% static 'img/main/concol.jpg' %}" alt="imagen consolas" style="width:100%"><br>
+                    ¡Nuevo stock en consolas!
+                  </p>
+              </a>
+              <a href="{% url 'game:allgame' %}" class="list-group-item">
+                  <p style="text-align: center;"><img src="{% static 'img/main/colgame.png' %}" alt="imagen juegos" style="width:100%"><br>
+                    ¡Nuevo stock en videojuegos!
+                  </p>
+              </a>
+
+              <a href="{% url 'tcg' %}" class="list-group-item">
+                  <p style="text-align: center;"><img src="{% static 'img/main/coltcg.png' %}" alt="imagen tcg" style="width:100%"><br>
+                    ¡Nuevo stock en TCG!
+                </p>
+              </a>
+            </div>
+      </div>
+
+      <!--Sección para el carrusel-->
+        <div class="col-lg-8">
+          <div class="container">
+            <!--CARRUSEL-->
+                    <div class="card mt-4">
+              <div id="demo" class="carousel slide" data-ride="carousel">
+
+              <!-- Indicators -->
+              <ul class="carousel-indicators">
+                <li data-target="#demo" data-slide-to="0" class="active"></li>
+                <li data-target="#demo" data-slide-to="1"></li>
+                <li data-target="#demo" data-slide-to="2"></li>
+                <li data-target="#demo" data-slide-to="3"></li>
+              </ul>
+      
+              <!-- The slideshow -->
+              {% for Banner in object_list %}
+              <div class="carousel-inner">
+                  <div class="carousel-item active">
+                      <a href="#"><img alt="banner" src="{% static 'img/main/main.png' %}"  style="width:100%;"></a>
+                    </div>
+                {% for VG in Banner.ban_vg.all %}
+                  <div class="carousel-item">
+                    <a href="{{ VG.get_absolute_url }}"><img alt="banner" src="{{ VG.vg_banner.url }}"  style="width:100%;"></a>
+                  </div>
+                {% endfor %}
+                </div>
+              {% endfor %}
+      
+                <!-- Left and right controls -->
+                <a class="carousel-control-prev" href="#demo" data-slide="prev">
+                  <span class="carousel-control-prev-icon"></span>
+                </a>
+                <a class="carousel-control-next" href="#demo" data-slide="next">
+                  <span class="carousel-control-next-icon"></span>
+                </a>
+              </div>
+            </div>
+            <div class="row">
+              <p></p>
+            </div>
+
+            <!--Cositas de abajo del container-->
+          <div class="row">
+
+                <div class="col-lg-4 col-md-6 mb-4">
+                  <div class="card h-100">
+                    <a href="#"><img src="{% static 'img/main/ps4front.png' %}" alt="imagen principal ps4"  class ="imagenresp" style="width: 100%;"></a>
+                    <div class="card-body">
+                      <h4 class="card-title">
+                        <a href="#">PlayStation 4</a>
+                      </h4>
+                        <ul>
+                          <li>
+                            <a href="#">Consolas</a>
+                          </li>
+                          <li>
+                            <a href="#">Accesorios</a>
+                          </li>
+                          <li>
+                            <a href="{% url 'game:ps4game' %}">Juegos</a>
+                          </li>
+                        </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card h-100">
+                      <a href="#"><img src="{% static 'img/main/nswfront.png' %}" alt="imagen principal nintendo switch"  class ="imagenresp" style="width: 100%;"></a>
+                      <div class="card-body">
+                        <h4 class="card-title">
+                          <a href="#">Nintendo Switch</a>
+                        </h4>
+                          <ul>
+                            <li>
+                              <a href="#">Consolas</a>
+                            </li>
+                            <li>
+                              <a href="#">Accesorios</a>
+                            </li>
+                            <li>
+                              <a href="{% url 'game:nswgame' %}">Juegos</a>
+                            </li>
+                          </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-lg-4 col-md-6 mb-4">
+                      <div class="card h-100">
+                        <a href="#"><img src="{% static 'img/main/xbofront.png' %}" alt="imagen principal xbone" class ="imagenresp" style="width: 100%;"></a>
+                        <div class="card-body">
+                          <h4 class="card-title">
+                            <a href="#">Xbox One</a>
+                          </h4>
+                            <ul>
+                              <li>
+                                <a href="#">Consolas</a>
+                              </li>
+                              <li>
+                                <a href="#">Accesorios</a>
+                              </li>
+                              <li>
+                                <a href="{% url 'game:xbogame' %}">Juegos</a>
+                              </li>
+                            </ul>
+                        </div>
+                      </div>
+                    </div>
+                  
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card h-100">
+                          <a href="{% url 'figuras' %}"><img src="{% static 'img/main/figurfront.png' %}" alt="imagen principal figuras" class ="imagenresp" style="width: 100%;"></a>
+                          <div class="card-body">
+                            <h4 class="card-title">
+                              <a href="{% url 'figuras' %}">Figuras</a>
+                            </h4>
+                              <ul>
+                                <li>
+                                  <a href="#">Funko POP</a>
+                                </li>
+                                <li>
+                                  <a href="#">Otros</a>
+                                </li>
+                              </ul>
+                           </div>
+                         </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card h-100">
+                          <a href="{% url 'tcg' %}"><img src="{% static 'img/main/tcgfront.png' %}" alt="imagen principal tcg" class ="imagenresp" style="width: 100%;"></a>
+                          <div class="card-body">
+                            <h4 class="card-title">
+                              <a href="{% url 'tcg' %}">TCG</a>
+                            </h4>
+                              <ul>
+                                <li>
+                                  <a href="#">Magic: The Gathering</a>
+                                </li>
+                                <li>
+                                  <a href="#">Pokemon</a>
+                                </li>
+                                <li>
+                                  <a href="#">Yu-Gi-Oh!</a>
+                                </li>
+                              </ul>
+                           </div>
+                         </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card h-100">
+                          <a href="#"><img src="{% static 'img/main/retrofront.png' %}" alt="imagen principal retro" class ="imagenresp" style="width: 100%;"></a>
+                          <div class="card-body">
+                            <h4 class="card-title">
+                              <a href="#">Retro</a>
+                            </h4>
+                              <ul>
+                                <li>
+                                  <a href="{% url 'retro' %}">Consolas</a>
+                                </li>
+                              </ul> 
+                           </div>
+                         </div>
+                    </div>
+              </div>
+            </div>
+          </div>
+      </div>
+    </div>
+
+{% endblock %}

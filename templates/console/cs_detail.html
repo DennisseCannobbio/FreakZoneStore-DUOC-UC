@@ -1,0 +1,144 @@
+{% extends "main_template.html" %}
+{% load humanize %}
+{% block content %}
+<div class="container">
+        
+    <!--Zona de productos relacionados-->
+    <div class="row">
+            <div class="col-lg-3 d-none d-lg-table-cell">
+                    <h2 class="my-4" style="text-align: center">Productos relacionados</h2>
+                    <div class="list-group">
+                      <a href="kirbysa.html" class="list-group-item">
+                        <p style="text-align: center;">{% load static %}<img src="{% static 'img/game/cover/kirbysa.jpg' %}" alt="kirbycover" width="100"><br>
+                          Kirby Star Allies<br> (Nintendo Switch)<br>
+                        $49.990</p>
+                      </a>
+                      <a href="zeldalaw.html" class="list-group-item">
+                          <p style="text-align: center;"><img src="{% static 'img/game/cover/zeldalinkawpre.jpg' %}" alt="zeldacover" width="100"><br>
+                            The Legend of Zelda:<br> Link's Awakening <br> (Nintendo Switch)<br>
+                          $59.990</p>
+                      </a>
+                      <a href="ys8sw.html" class="list-group-item">
+                        <p style="text-align: center;"><img src="{% static 'img/game/cover/ys8nsw.png' %}" alt="ys8cover" width="100"><br>
+                          YS VIII<br>Lacrimosa Of Dana <br> (Nintendo Switch)<br>
+                        $49.990</p>
+                      </a>
+                    </div>
+        </div>
+
+    <!--MAIN-->
+    <div class="col-lg-9">
+
+        <!--CARRUSEL-->
+        <div class="card mt-4">
+            <div id="demo" class="carousel slide" data-ride="carousel">
+
+                <!-- Indicators -->
+                <ul class="carousel-indicators">
+                    <li data-target="#demo" data-slide-to="0" class="active"></li>
+                    <li data-target="#demo" data-slide-to="1"></li>
+                    <li data-target="#demo" data-slide-to="2"></li>
+                    <li data-target="#demo" data-slide-to="3"></li>
+                </ul>
+        
+                <!-- The slideshow -->
+                <div class="carousel-inner">
+                    <div class="carousel-item active">
+                        <img src="{{ object.cs_main_img.url }}" alt="Imagen Principal" style="width:100%">
+                    </div>
+                </div>
+        
+                <!-- Left and right controls -->
+                <a class="carousel-control-prev" href="#demo" data-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </a>
+                <a class="carousel-control-next" href="#demo" data-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </a>
+            </div>
+        </div>
+
+        <!--TEXTO DE PROD-->
+        <div class="card-body">
+            <h3 class="card-title">{{ object.cs_nom }}</h3>
+            <h4>${{ object.cs_price|intcomma }}</h4>
+            <button type="button" class="btn btn-secondary" id="agregar" onclick="cambio()">Agregar al carrito</button>
+            <span class="text-warning">&#9733; &#9733; &#9733; &#9733; &#9734;</span>
+            4.0 stars
+            <div class="row-sm1">
+                <h4><br></h4>
+            </div>
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="home-tab" data-toggle="tab" href="#descr" role="tab" aria-controls="descr" aria-selected="true">Descripción</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="profile-tab" data-toggle="tab" href="#spec" role="tab" aria-controls="spec" aria-selected="false">Especificaciones</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="contact-tab" data-toggle="tab" href="#rev" role="tab" aria-controls="rev" aria-selected="false">Reseñas</a>
+                </li>
+            </ul>
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active" id="descr" role="tabpanel" aria-labelledby="home-tab">
+                    <p class="card-text">
+                        {{ object.cs_descr }}
+                    </p>
+                </div>
+                <div class="tab-pane fade" id="spec" role="tabpanel" aria-labelledby="profile-tab">
+                        <table class="table table-striped">
+                                <tbody>
+                                    <tr>
+                                      <td><b>Tipo</b></td>
+                                        <td>{{ object.cs_plat }}</td>
+                                      </tr>
+                                    <tr>
+                                        <td><b>Peso</b></td>
+                                        <td>{{ object.cs_wght }} gr.</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Resolución</b></td>
+                                        <td>{{ object.cs_res }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Color</b></td>
+                                        <td>{{ object.cs_color }}</td>
+                                    </tr>
+                                    <tr>
+                                      <td><b>Memoria</b></td>
+                                      <td>{{ object.cs_storage }}</td>
+                                    </tr>
+                                    <tr>
+                                      <td><b>Conectividad</b></td>
+                                        <td>{{ object.cs_conn.all|join:", " }}</td>
+                                      </tr>
+                                </tbody>
+                            </table>
+                </div>
+                <div class="tab-pane fade" id="rev" role="tabpanel" aria-labelledby="contact-tab">
+                    <div class="card card-outline-secondary my-4">
+                        <div class="card-header">
+                            Reseñas del producto
+                        </div>
+                        <div class="card-body">
+                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Omnis et enim aperiam inventore, similique necessitatibus neque non! Doloribus, modi sapiente laboriosam aperiam fugiat laborum. Sequi mollitia, necessitatibus quae sint natus.</p>
+                            <small class="text-muted">Posted by Anonymous on 3/1/17</small>
+                            <hr>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Omnis et enim aperiam inventore, similique necessitatibus neque non! Doloribus, modi sapiente laboriosam aperiam fugiat laborum. Sequi mollitia, necessitatibus quae sint natus.</p>
+                            <small class="text-muted">Posted by Anonymous on 3/1/17</small>
+                            <hr>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Omnis et enim aperiam inventore, similique necessitatibus neque non! Doloribus, modi sapiente laboriosam aperiam fugiat laborum. Sequi mollitia, necessitatibus quae sint natus.</p>
+                            <small class="text-muted">Posted by Anonymous on 3/1/17</small>
+                            <hr>
+                            <a href="#" class="btn btn-success">Deja tu reseña</a>
+                        </div>
+                    </div>
+                </div>
+        </div>
+
+    </div>
+
+</div>
+</div>
+</div>
+{% endblock %}

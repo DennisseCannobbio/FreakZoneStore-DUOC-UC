@@ -1,0 +1,67 @@
+{% extends "main_template.html" %}
+{% load humanize %}
+{% block content %}
+<div class="container">
+    <!--MAIN-->
+    <div class="col-lg-9">
+
+        <!--TEXTO DE PROD-->
+        <div class="card-body">
+            <div class="row-sm1">
+                <h4><br></h4>
+            </div>
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                <li class="nav-item">   
+                    <a class="nav-link active" id="home-tab" data-toggle="tab" href="#descr" role="tab" aria-controls="descr" aria-selected="true">Información del Usuario</a>
+                </li>
+            </ul>
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active" id="descr" role="tabpanel" aria-labelledby="home-tab">
+                    <table class="table table-striped">
+                        <tbody>
+                            <tr>
+                                <td><b>Usuario</b></td>
+                                <td>{{ user.first_name }} {{ user.last_name }}</td>
+                            </tr>
+                            <tr>
+                                <td><b>RUT</b></td>
+                                <td>{{ user.cuenta.cuent_rut }}</td>
+                            </tr>
+                            <tr>
+                                <td><b>Teléfono</b></td>
+                                <td>{{ user.cuenta.desp_telef }}</td>
+                            </tr>
+                            <tr>
+                                <td><b>E-Mail</b></td>
+                                <td>{{ user.email }}</td>
+                            </tr>
+                            <tr>
+                              <td><b>Fecha de Nacimiento</b></td>
+                              <td>{{ user.cuenta.cuent_fecnac}}</td>
+                            </tr>
+                            <tr>
+                              <td><b>Región</b></td>
+                                <td>{{ user.cuenta.desp_region }}</td>
+                              </tr>
+                            <tr>
+                              <td><b>Comuna</b></td>
+                              <td>{{ user.cuenta.com_nombre }}</td>
+                            </tr>
+
+                            <tr>
+                                <td><b>Dirección</b></td>
+                                <td>{{ user.cuenta.desp_direccion }}</td>
+                              </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+
+        </div>
+
+    </div>
+
+</div>
+</div>
+</div>
+{% endblock %}

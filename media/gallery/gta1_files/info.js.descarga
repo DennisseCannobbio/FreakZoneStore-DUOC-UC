@@ -1,0 +1,290 @@
+define(['jquery', 'underscore', 'backbone', 'dry/views/superController', 'text!' + V.base + V.i18n + 'info?xhr', 'lib/util', 'videoplayer'], function($, _, Backbone, SuperControlller, markup, Util) {
+	var info = SuperControlller.extend({
+		id : '#info',
+		currTopOffset : 0,
+		events : {
+			'click ul.nav a, .slider-nav a, .videos a' : "clickNavLink",
+			'click .mobile-thumb-wrap' : "loadVideo",
+			'click .close' : "closeMobileVideo",
+			'click .history' : 'linkClick'
+		},
+		initialize : function(options) {
+			this.render(markup);
+
+			this.$sections = this.$root.find('section');
+			this.$divs =this.$sections.find('>div');
+			this.$fixeds =this.$sections.find('.fixed-box');
+			this.$viewport = this.$root.find('.viewport');
+			this.footerHeight = $('.navbar').outerHeight();
+
+			$(window).on("resize", _.bind(this.resize, this));
+			this.resize();
+			this.update(options);
+
+			if(!$.browser.mobile){
+				$('#mvid.ipad').videoplayer({
+		     		'agegate' : false,
+		     		'resolution' : 'HD',
+		     		'videoid' : 10521
+		     	});
+
+		     	$('#fvid.ipad').videoplayer({
+		     		'agegate' : false,
+		     		'resolution' : 'HD',
+		     		'videoid' : 10531
+		     	});
+
+		     	$('#tvid.ipad').videoplayer({
+		     		'agegate' : false,
+		     		'resolution' : 'HD',
+		     		'videoid' : 10541
+		     	});
+
+		     	$('#onlineVid.ipad').videoplayer({
+		     		'agegate' : false,
+		     		'resolution' : 'HD',
+		     		'videoid' : 10983
+		     	});
+			}
+			
+			var id = $('.videoplayer', this.$root).data('id') !== 11122 ? $('.videoplayer', this.$root).data('id') : 10983,
+				locale = $('.videoplayer', this.$root).data('id') !== 11122 ? V.locale : 'en_us';
+		    $('.videoplayer', this.$root).videoplayer({
+		    	'agegate' : false,
+		    	'resolution' : 'HD',
+		    	'videoid' : id,
+				'locale' : locale
+	     	});
+		},
+		linkClick : function (e) {
+			e.preventDefault();
+			var $a = $(e.currentTarget);
+			window.dryRouter.navigate(Util.urlSanitize($a.attr('href')), {replace: true, trigger: CincoModel.get('shouldTriggerURL')});
+		},
+		update : function(options) {
+			if (!$.browser.mobile){
+				this.jumpToSection(this.getTargetByURL(Backbone.history.fragment, options.section, options.subsection), Backbone.history.fragment);
+			}
+		},
+
+		resize : function() {
+			var windowHeight = $(window).height(),
+				windowWidth = $(window).width(),
+				onlineVideoWidth = $('.videoplayer').width(),
+				videoWidth = $('.videoplayer-mobile').width(),
+				videoMobileWidth = $('.videoplayer-mobile-phone').width(),
+				videoTop = $('.top', '.screen .content').height(),
+ 				heightRatio = 1280/720,
+ 				widthRatio = 720/1280,
+ 				videoMobileHeight = windowWidth * widthRatio;
+
+			this.$root.find('section').css('min-height', Math.max(500, $(window).height()));
+			this.$root.find('section#new, section#ps4').css('min-height', Math.max(715, $(window).height()));
+			this.$root.find('section#pc').css('min-height', Math.max(820, $(window).height()));
+			this.$root.find('section#editor').css('min-height', Math.max(820, $(window).height()));
+			$('>ul.nav', this.$root).css('min-height', $(window).height());
+
+			$('.videoplayer-mobile').css('height', videoWidth * widthRatio);
+
+			if($('.videoplayer-mobile-phone')) {
+	 			if(videoTop + videoMobileHeight > windowHeight) {
+	 				$('.videoplayer-mobile-phone').css({
+	 					'height' : windowHeight - videoTop,
+	 					'width' : (windowHeight - videoTop) * heightRatio
+	 				})
+	 			}
+	 			else {
+	 				$('.videoplayer-mobile-phone').css({
+	 					'height' : videoMobileHeight,
+	 					'width' : '100%'
+	 				})
+	 			}
+	 		}
+
+			$('.videoplayer', this.$root).css('height', onlineVideoWidth * widthRatio);
+		},
+
+		getTargetByURL : function(url, section, subsection) {
+			var target = 'section#overview';
+			if (typeof section === 'undefined') {
+				var parts = url.substring('info'.length+1, url.length).split('/');
+				if (parts.length === 1 && parts[0] !== '')
+					section = parts[0]
+				if (parts.length === 2)
+					subsection = parts[1]
+			}
+			if (typeof section !== 'undefined')
+				target = 'section#'+section;
+			if (typeof subsection !== 'undefined')
+				target += ' .'+subsection;
+
+			return target;
+
+		},
+
+		jumpToSection : function(target, url) {
+
+			var self = this,
+				$section = $(target),
+				css = {};
+
+			if ($section.length === 0)
+				return;
+			var isHorizontal = $section.parent('section').length === 1,
+				setMainSection = function($main, auto) {
+
+					if (auto)
+						$main.addClass('placed');
+					else
+						V.IELT10?this.$sections.addClass('placed'):self.$sections.removeClass('placed');
+
+					self.$sections.each(function(){
+						if ($(this).index() < $main.index())
+							$(this).removeClass('active').addClass('inactive above');
+						if ($(this).index() > $main.index())
+							$(this).removeClass('active').addClass('inactive below');
+					});
+
+					setTimeout(function(){
+						$main.addClass('placed')
+					},500);
+
+				}
+
+
+			$section.find('>div').removeClass('active');
+
+			if (isHorizontal) {
+				var $div = $section,
+					$divs = $div.siblings();
+				$divs.removeClass('active placed left right');
+				V.IELT10?$div.addClass('placed'):$divs.removeClass('placed');
+
+				$divs.each(function(){
+					if ($(this).index() < $section.index())
+						$(this).removeClass('active').addClass('inactive left');
+					if ($(this).index() > $section.index())
+						$(this).removeClass('active').addClass('inactive right');
+				})
+				$div.addClass('active').removeClass('inactive left right');
+				setTimeout(function(){
+					$div.addClass('placed')
+				},500);
+				setMainSection($div.parent('section'), true);
+			} else {
+				$section.find('>div').removeClass('active placed left').addClass('inactive right');
+				$section.find('>div:first-child').removeClass('inactive right');
+				$section.addClass('active').removeClass('inactive above below');
+				
+				setTimeout(function() {
+					$('section:not(.active) > div:first-child').removeClass('active inactive left');
+					$('section:not(.active) > div:not(:first-child)').removeClass('placed active left').addClass('inactive right');
+				}, 1500);
+
+				setMainSection($section, false);
+			}
+
+			if ($section.find('>div').length > 1 && $section.selector != 'section#editor .features') {
+				window.Vlogo.attachTo($section.find('>div:eq(0)'))
+			} else {
+				window.Vlogo.attachTo($section)
+			}
+
+			this.highlightSection(url);
+
+		},
+
+		highlightSection : function(url) {
+			var urlParts = url.split('/');
+			if (urlParts.length === 3) {
+				var subsection = urlParts.pop();
+				if(subsection === 'features') {
+					this.goToEditorSlide()
+				}
+			}
+			if (urlParts.length === 4) {
+				this.goToEditorSlide(urlParts.pop());
+			}
+			url = urlParts.join('/');
+
+			var $a = this.$root.find('>ul.nav a').filter(function(){
+				return Util.urlSanitize($(this).attr('href')) === url;
+			});
+			if ($a.length === 1) {
+				this.$root.find('>ul.nav li').removeClass('active');
+				$a.parent().addClass('active');
+				this.$viewport.attr('section', $a.html());
+			}
+		},
+
+		goToEditorSlide : function(slide) {
+			if(slide === undefined)
+				$('.item', '.editor-slider').removeClass('active').eq(0).addClass('active');
+			else
+				$('.item', '.editor-slider').removeClass('active').eq(--slide).addClass('active');
+		},
+
+		clickNavLink : function(e) {
+			if($(e.currentTarget).hasClass('link')) {
+				return;
+			}
+			e.preventDefault();
+			e.stopPropagation();
+
+			var videoSrc = $('.videoplayer iframe', 'section#GTAOnline').attr('src');
+			$('.videoplayer iframe', 'section#GTAOnline').attr('src', videoSrc);
+
+			window.dryRouter.navigate(Util.urlSanitize($(e.currentTarget).attr('href')), {trigger: CincoModel.get('shouldTriggerURL')});
+		},
+
+		loadVideo : function(e){
+			var vidId = $(e.currentTarget).attr('id'),
+				infoHeight = $('#info').css('height'),
+				self = this;
+
+			self.currTopOffset = $('.view').scrollTop();
+			$('.view').scrollTop(0);
+			this.$root.addClass('screenOn');
+			$('.view').css('overflow','hidden');
+
+			$('.videoplayer-mobile-phone').fadeTo(200,1, function(){
+				$('.videoplayer-mobile-phone').videoplayer({
+	     			'agegate' : false,
+	     			'resolution' : 'HD',
+	     			'locale' : V.locale,
+	     			'videoid' : vidId
+	     		});
+				var windowHeight = $(window).height(),
+					windowWidth = $(window).width(),
+					videoMobileWidth = $('.videoplayer-mobile-phone').width(),
+					navHeight = $('.mobile-navbar').outerHeight(),
+					videoTop = $('.top', '.screen .content').height(),
+     				heightRatio = 1280/720,
+     				widthRatio = 720/1280,
+     				videoMobileHeight = windowWidth * widthRatio;
+
+     			if(videoTop + videoMobileHeight > windowHeight) {
+     				$('.videoplayer-mobile-phone').css({
+     					'height' : windowHeight - videoTop,
+     					'width' : (windowHeight - videoTop) * heightRatio
+     				})
+     			}
+     			else {
+     				$('.videoplayer-mobile-phone').css({
+     					'height' : videoMobileHeight,
+     					'width' : '100%'
+     				})
+     			}
+			});
+
+		},
+
+		closeMobileVideo : function(e) {
+			$('.videoplayer-mobile-phone iframe').removeAttr('src');
+			this.$root.removeClass('screenOn');
+			$('.view').scrollTop(this.currTopOffset);
+			$('.view').css('overflowY','auto');
+		}
+	})
+	return info;
+});

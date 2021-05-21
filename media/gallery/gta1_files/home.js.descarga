@@ -1,0 +1,251 @@
+define(['jquery', 'underscore', 'backbone', 'dry/views/superController', 'lib/util', 'text!' + V.base + V.i18n + '?xhr', 'videoplayer'], function($, _, Backbone, SuperController, Util, markup) {
+	var index = SuperController.extend({
+		id : '#home',
+		$target : {},
+		$mast : {},
+		$mastContent : {},
+		activeView:{},
+		removalTimeout : null,
+		invaderPlaying : false,
+		events : {
+			'click a.lifeinvader' : 'clickLifeInvader',
+			'click ul.thumbs a':'clickThumb',
+			'click .lsbcItem .close' : 'closeContent',
+			'touchend .lsbcItem .close' : 'closeContent',
+			'mouseenter ul.thumbs li.activable' : 'mouseEnterLI',
+			'mouseleave ul.thumbs li' : 'mouseLeaveLI',
+			'hidden .modal.video' : 'hiddenModalVideo'
+		},
+		initialize : function(options) {
+			var self = this;
+
+			this.render(markup);
+
+			this.$mast = $('#home-intro');
+			this.$mastContent = $('.content', this.$mast);
+			this.$target = $('#lsbc-xhrTarget');
+
+			$('ul.thumbs li span', this.$root).fitText(1.1, {minFontSize: '15px', maxFontSize: '34px'});
+			$('.content p', this.$root).fitText(2, {minFontSize: '27px'});
+
+			$(window).on("resize", _.bind(this.resize, this));
+			$('.close', '.modal.video').on('click', function(){
+				self.closeInvader();
+			})
+
+			CincoModel.on('change:lsbcLoading', function(model) {
+				var loading = model.get('lsbcLoading');
+				loading ? self.$target.addClass('loading') : self.$target.removeClass('loading');
+				setTimeout(function(){
+					$(window).trigger('resize');
+				}, 100);
+			});
+
+			CincoModel.on('change:loading', function(model) {
+				var loading = model.get('loading');
+				if (loading) {
+					self.removeOldPage();
+				}
+			});
+
+			this.thumbs();
+			this.header();
+			this.update(options);
+
+			this.$mast.addClass('active');
+
+			window.Vlogo.attachTo($('.bottom', self.$root)).$el.attr('athome', true);
+		},
+		update : function(options) {
+
+		},
+		mouseEnterLI : function(e){
+			$('ul.thumbs', this.$root).addClass('hover');
+		},
+
+		mouseLeaveLI : function(e){
+			$('ul.thumbs', this.$root).removeClass('hover');
+		},
+		thumbs : function() {
+			$('ul.thumbs li', this.$root).each(function(){
+				var $li = $(this),
+					$injectInto = $('a', $li).length > 0 ? $('a', $li) : $('.content', $li);
+
+				$injectInto.append($('<img />').on('load', function(e){
+					$li.addClass('loaded');
+				}).attr('src', V.base + $(this).data('thumb')))
+			})
+		},
+		update : function(options) {
+			setTimeout(function(){
+				$(window).trigger('resize');
+			}, 100);
+			if (options.showLifeInvader === true )
+				this.openInvader();
+			else
+				this.closeInvader();
+			this.setItem(options);
+			this.resize();
+			this.setTitle();
+		},
+		header : function() {
+			var self = this,
+				timeout = null,
+				index = 0,
+				seconds = 20,
+				animationSeenCookie = 'headerAnimationCookie',
+				$items = $('.bg', '#home-intro'),
+				change = function() {
+					$items.removeClass('active').filter(function(){
+						return $(this).index() === index
+					}).addClass('active')
+
+					index = index+1===$items.length?0:index+1
+				}
+			if ($.cookie(animationSeenCookie) !== 'true') {
+				$('#home-intro').addClass('animation');
+				swfobject.embedSWF(V.base + "vid/lsbc-id.swf", "home-idAnimation", "1", "1", "9.0.0", null, "", {wmode:'transparent'});
+				$.cookie(animationSeenCookie, 'true', { _expires : 0, path: '/'});
+			}
+
+			timeout = setInterval(function(){
+				if ($items.length === 0)
+					clearInterval(timeout);
+				change();
+			}, seconds * 1000);
+
+			change();
+		},
+		setItem : function(options) {
+			var self = this;
+			if (!$.isEmptyObject(self.activeView) && self.activeView.id === options.item) {
+				return self.activeView.update(options);
+			}
+
+			$('ul.thumbs li', this.$root).removeClass('active');
+			var $a = $('ul.thumbs li a', this.$root).filter(function(){
+				return $(this).data('item') === options.item;
+			});
+			$a.parent('li').addClass('active')
+
+			clearTimeout(this.removalTimeout);
+			CincoModel.set('lsbcLoading', true);
+			if ($a.length === 0) {
+				$('ul.thumbs').removeClass('active');
+				self.removeOldPage(function(){
+					self.$target.empty();
+				});
+			} else {
+				$('ul.thumbs').addClass('active');
+				self.removeOldPage(function() {
+					$('html, body').animate({scrollTop: self.$target.offset().top - 50}, 100, 'linear');
+					self.loadNewPage(options);
+				});
+			}
+
+		},
+
+		removeOldPage : function(callback) {
+			var self = this;
+
+			this.removalTimeout = setTimeout(function() {
+
+				if (!$.isEmptyObject(self.activeView)) {
+					self.activeView.close();
+					self.activeView = {};
+				}
+				typeof callback === 'function' ? callback() : null;
+			}, 500);
+		},
+
+		loadNewPage : function(options) {
+			var self = this;
+
+			require(
+				['lsbc/views/'+options.item],
+				function(view){
+					self.activeView = new view({'id':options.item, options:options});
+				}
+			);
+
+		},
+
+		clickLifeInvader : function(e) {
+			e.preventDefault();
+			this.openInvader();
+			window.dryRouter.navigate('/lifeinvader', {trigger: CincoModel.get('shouldTriggerURL')});
+		},
+
+		closeInvader : function() {
+			if(this.invaderPlaying) {
+				this.invaderPlaying = false;
+				$('.videoplayer', '.modal.lifeinvader').empty();
+				$('.modal.lifeinvader').modal('hide').removeClass('lifeinvader')
+				window.dryRouter.navigate('/', {trigger: CincoModel.get('shouldTriggerURL')});
+			}
+		},
+
+		openInvader : function() {
+			var self = this;
+			if (this.invaderPlaying)
+				return;
+			this.invaderPlaying = true;
+			$('.modal.video').addClass('lifeinvader').modal('show').find('.modal-body .videoplayer').html($('<video/>').attr('id', 'modalVideo'));
+
+			$('video').on('ended', function() {
+				self.closeInvader();
+			});
+
+			var videoType = Util.getSupportedVideoFormat($('#modalVideo').get(0)),
+				url = V.base + 'vid/lifeinvader/lifeinvader.'+videoType;
+
+			$('#modalVideo').prop({"loop":false, 'src': url, 'controls' : (navigator.userAgent.match(/iPad/i) != null?true:false)});
+			$('#modalVideo')[0].play();
+		},
+		closeContent: function(e) {
+			$('html, body').animate({scrollTop: this.$target.offset().top - 50}, 100, 'linear');
+			window.dryRouter.navigate('/', {trigger: CincoModel.get('shouldTriggerURL')});
+		},
+		clickThumb : function(e) {
+			var self = this;
+
+			e.preventDefault();
+
+			var $a = $(e.currentTarget),
+				$li = $a.parents('li'),
+				url = $li.hasClass('active')?'/':Util.urlSanitize($a.attr('href'));
+
+			window.dryRouter.navigate(url, {trigger: CincoModel.get('shouldTriggerURL')});
+		},
+		resize : function() {
+			var thumbDimensions = {width:640,height:360},
+				mastDimensions = {width:1920, height:800},
+				animationDimensions = {width:700, height:550},
+				mastRatio = mastDimensions.width/mastDimensions.height,
+				width = this.$root.width(),
+				windowHeight = $(window).height(),
+				mobileHomeHeight = $('.mobile#home').height();
+
+			if(mobileHomeHeight && mobileHomeHeight < windowHeight){
+				$('#home').css('height', windowHeight - 80);
+			}
+
+			this.$mast.css({'height': width/mastRatio});
+
+			var mastHeight = parseInt(this.$mast.css('height')),
+				animationHeight = mastHeight * .65,
+				animationWidth = (animationDimensions.width/animationDimensions.height) * animationHeight,
+				pHeight = parseInt($('.content p', this.$mast).css('height')),
+				contentHeight = pHeight + animationHeight;
+
+			$('#home-idAnimation', this.$root).css({'width' : animationWidth, 'height': animationHeight});
+
+			$('ul.thumbs li', this.$root).each(function(){
+				$(this).css('height', $(this).outerWidth(true)/(thumbDimensions.width/thumbDimensions.height))
+			})
+
+			this.$mastContent.css('padding-top', (mastHeight-pHeight-$('#home-idAnimation', this.$root).outerHeight(true))*.5);
+		}
+	})
+	return index;
+});
